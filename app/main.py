@@ -12,6 +12,7 @@ load_dotenv()
 
 app = FastAPI(title="HabitFlow AI Engine")
 
+# Permissive CORS handling for frontend connections
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -20,6 +21,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Structural base directory paths for mounting
 current_dir = os.path.dirname(os.path.abspath(__file__))
 base_dir = os.path.dirname(current_dir)
 frontend_path = os.path.join(base_dir, "frontend")
@@ -36,43 +38,74 @@ async def analyze_task(payload: TaskInput):
     api_key = os.getenv("GEMINI_API_KEY", "")
     task_lower = payload.task_description.lower()
     
-    # ---- 1. LIVE API PIPELINE ----
+    # ---- 1. LIVE DYNAMIC AI PIPELINE ----
     if api_key:
         try:
+            # Fixed REST URL path structure
             url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={api_key}"
+            
             prompt = f"""
-            Analyze the user's task and break it down into relevant micro-steps.
+            You are a professional life coach and behavioral strategist.
+            Analyze the user's task and break it down into relevant, real-world actionable micro-steps.
+            
             User's Task: "{payload.task_description}"
             Current Energy State: "{payload.energy_level}"
+
+            CRITICAL RULES:
+            1. Your answer MUST be completely unique and relevant to the user's input words. If they talk about a presentation, wedding, or coding, give steps specifically for that. 
+            2. Tailor the breakdown steps contextually to match their energy level.
+
             Return a valid JSON object matching this exact structure:
             {{
                 "original_task": "{payload.task_description}",
                 "user_energy_level": "{payload.energy_level}",
-                "recommended_action_strategy": "Action Plan",
+                "recommended_action_strategy": "Dynamic Analysis Plan",
                 "suggested_micro_tasks": [
-                    {{"task_title": "Step description", "estimated_minutes": 15, "justification": "Why"}}
+                    {{
+                        "task_title": "Actionable step title matching their exact goal",
+                        "estimated_minutes": 15,
+                        "justification": "Why this specific step helps their unique situation right now"
+                    }}
                 ]
             }}
             """
+            
             request_body = {
                 "contents": [{"parts": [{"text": prompt}]}],
                 "generationConfig": {"responseMimeType": "application/json"}
             }
             
-            async with httpx.AsyncClient(timeout=5.0) as client:
-                response = await client.post(url, json=request_body)
+            headers = {"Content-Type": "application/json"}
+            
+            async with httpx.AsyncClient(timeout=10.0) as client:
+                response = await client.post(url, json=request_body, headers=headers)
+                
                 if response.status_code == 200:
-                    raw_text = response.json()['candidates'][0]['content']['parts'][0]['text'].strip()
-                    return json.loads(raw_text)
-        except Exception:
+                    response_data = response.json()
+                    raw_text = response_data['candidates'][0]['content']['parts'][0]['text'].strip()
+                    
+                    if raw_text.startswith("```"):
+                        raw_text = raw_text.split("\n", 1)[1]
+                    if raw_text.endswith("```"):
+                        raw_text = raw_text.rsplit("\n", 1)[0]
+                        
+                    return json.loads(raw_text.strip())
+        except Exception as e:
+            print(f"Live Pipeline Connection Exception: {str(e)}")
             pass
 
-    # ---- 2. DYNAMIC MATCHING ENGINE (Conditional Logic for All Levels) ----
+    # ---- 2. DYNAMIC MATCHING ENGINE (Zero-Fail Contextual Backup Matrix) ----
     
-    # ==========================================
-    # CATEGORY A: WEDDING / EVENT CONTEXT
-    # ==========================================
-    if any(word in task_lower for word in ["wedding", "marriage", "ceremony", "party", "function", "tomorrow"]):
+    # UNUSUAL INPUT / GIBBERISH COUNTER
+    if len(task_lower.strip()) < 5 or not any(char.isalpha() for char in task_lower) or task_lower.strip() in ["abcd", "xyz", "qwer", "1234"]:
+        strategy = "Clarity Realignment Protocol"
+        tasks = [
+            {"task_title": "Pause and define one clear, tiny objective", "estimated_minutes": 2, "justification": "Your current input seems a bit unorganized. Action steps require a concrete task target to map out plan flows."},
+            {"task_title": "Type a simple 3-word action description in the box (e.g., 'Clean my room')", "estimated_minutes": 3, "justification": "Lowering the thought footprint to a basic phrase resets starting paralysis instantly."}
+        ]
+
+    # WEDDING / EVENT CONTEXT
+    elif any(word in task_lower for word in ["wedding", "marriage", "ceremony", "party", "function", "tomorrow"]):
         if "Low" in payload.energy_level:
             strategy = "Five-Minute Event Wrap"
             tasks = [
@@ -92,32 +125,34 @@ async def analyze_task(payload: TaskInput):
                 {"task_title": "Organize your entry items, card contents, or gift packages", "estimated_minutes": 15, "justification": "Standard focus levels are perfectly suited for handling detail sorting."}
             ]
     
-    # ==========================================
-    # CATEGORY B: ACADEMIC / COLLEGE CONTEXT
-    # ==========================================
-    elif any(word in task_lower for word in ["assignment", "project", "submit", "exam", "study", "test", "college"]):
+    # ACADEMIC / COLLEGE / PRESENTATION CONTEXT
+    elif any(word in task_lower for word in ["assignment", "project", "submit", "exam", "study", "test", "college", "presentation"]):
         if "Low" in payload.energy_level:
             strategy = "Five-Minute Academic Spark"
             tasks = [
-                {"task_title": "Open your workspace file and scan the first requirement line", "estimated_minutes": 5, "justification": "Sustains momentum by lowering starting friction to absolute zero."},
-                {"task_title": "Jot down a quick 3-bullet list mapping out the next steps", "estimated_minutes": 5, "justification": "Clears starting anxiety by visualizing a micro-progress track."}
+                {"task_title": "Open your project file and scan the first requirement line", "estimated_minutes": 5, "justification": "Sustains momentum by lowering starting friction to absolute zero."},
+                {"task_title": "Jot down a quick 3-bullet list mapping out the next steps", "estimated_minutes": 5, "justification": "Clears starting anxiety by visualizing a micro-progress track."},
+                {"task_title": "Locate and open your presentation slide template tool", "estimated_minutes": 5, "justification": "Prepares your environment so you are set up for success later."},
+                {"task_title": "Draft just the title slide and introduction heading text", "estimated_minutes": 5, "justification": "Secures an easy win to break visual mental blocks."}
             ]
         elif "High" in payload.energy_level:
             strategy = "Peak Academic Execution Drive"
             tasks = [
                 {"task_title": "Deep dive code structure and link your frontend layout to backend views", "estimated_minutes": 30, "justification": "Utilizes high focus spikes to conquer intense architectural logic tasks."},
-                {"task_title": "Refactor interface modules and clear your runtime console strings", "estimated_minutes": 20, "justification": "Maintains a high production output rate to polish items before delivery."}
+                {"task_title": "Build out the core content slides detailing your project architecture", "estimated_minutes": 20, "justification": "Maintains a high production output rate to capture the technical depth cleanly."},
+                {"task_title": "Refactor interface modules and clear your runtime console strings", "estimated_minutes": 15, "justification": "Polishes the system code for a flawless live demo presentation."},
+                {"task_title": "Run a full presentation dress rehearsal from start to finish", "estimated_minutes": 15, "justification": "Locks in your pacing and delivery structure for tomorrow's judges."}
             ]
         else:
             strategy = "Balanced Academic Milestone Sprint"
             tasks = [
                 {"task_title": "Review the assignment grading rubric and compliance requirements", "estimated_minutes": 10, "justification": "Ensures complete structural alignment before deeper development assets are locked."},
-                {"task_title": "Flesh out the basic documentation structural outline headings", "estimated_minutes": 20, "justification": "Maintains uniform progress without triggering cognitive burnout cycles."}
+                {"task_title": "Flesh out the basic documentation structural outline headings", "estimated_minutes": 20, "justification": "Maintains uniform progress without triggering cognitive burnout cycles."},
+                {"task_title": "Draft the architectural overview slide and add key feature screenshots", "estimated_minutes": 15, "justification": "Visually showcases your technical milestones step by step."},
+                {"task_title": "Verify submission links and test your app build end-to-end", "estimated_minutes": 10, "justification": "Guarantees that your live link works perfectly for final evaluation."}
             ]
         
-    # ==========================================
-    # CATEGORY C: CODING / APP DEVELOPMENT CONTEXT
-    # ==========================================
+    # CODING / APP DEVELOPMENT CONTEXT
     elif any(word in task_lower for word in ["code", "bug", "app", "frontend", "backend", "github", "run", "program"]):
         if "Low" in payload.energy_level:
             strategy = "Five-Minute Coding Recovery"
@@ -138,9 +173,7 @@ async def analyze_task(payload: TaskInput):
                 {"task_title": "Draft a clear pseudocode logical layout for the patch architecture", "estimated_minutes": 15, "justification": "Organizing logic outlines ensures rapid, zero-error manual composition loops."}
             ]
 
-    # ==========================================
-    # CATEGORY D: GENERAL DEFAULT FALLBACK ROUTE
-    # ==========================================
+    # GENERAL DEFAULT FALLBACK
     else:
         if "Low" in payload.energy_level:
             strategy = "Atomic Core Alignment"
