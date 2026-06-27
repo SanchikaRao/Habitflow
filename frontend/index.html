@@ -3,9 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HabitFlow</title>
+    <title>HabitFlow — Defeat Starting Paralysis</title>
     <style>
-        /* Base Setup & Space Background Styling */
         * {
             box-sizing: border-box;
             margin: 0;
@@ -14,334 +13,265 @@
         }
 
         body {
-            background-image: url('/static/habitflow.jpg');
-            background-size: cover;
-            background-position: center;
-            background-attachment: fixed;
-            background-repeat: no-repeat;
-            color: #ffffff;
             min-height: 100vh;
+            background: #0f0f11 url('/static/habitflow.jpg') no-repeat center center fixed;
+            background-size: cover;
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding: 40px 20px;
+            justify-content: center;
+            padding: 20px;
+            color: #fff;
         }
 
-        /* Header Elements */
-        header {
+        .header-section {
             text-align: center;
             margin-bottom: 40px;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.8);
         }
 
-        header h1 {
+        .header-section h1 {
             font-size: 3.5rem;
-            font-weight: 700;
+            font-weight: 800;
             letter-spacing: -1px;
             margin-bottom: 10px;
-            text-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
         }
 
-        header p {
-            color: #d1d5db;
-            font-size: 1.1rem;
-            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+        .header-section p {
+            font-size: 1.2rem;
+            color: #ccc;
         }
 
-        /* Dashboard Flex Container Grid Layout */
-        .dashboard-container {
+        .workspace-container {
             display: flex;
             width: 100%;
             max-width: 1100px;
-            gap: 24px;
+            gap: 30px;
             align-items: flex-start;
+            justify-content: center;
         }
 
-        /* Frosted Glass Container Styles (Glassmorphism Effect) */
-        .glass-card {
-            background: rgba(23, 28, 36, 0.65);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.12);
+        .panel-card {
+            background: rgba(255, 255, 255, 0.98);
+            color: #111;
             border-radius: 16px;
-            padding: 28px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-        }
-
-        .left-panel {
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
             flex: 1;
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
+            min-width: 320px;
         }
 
-        .right-panel {
-            flex: 1.6;
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-
-        /* Form Controls Formatting */
-        h2 {
-            font-size: 1.4rem;
-            font-weight: 600;
-            margin-bottom: 4px;
-        }
-
-        .section-label {
-            font-size: 0.75rem;
+        /* Input Form Elements */
+        .panel-card h2 {
+            font-size: 1.8rem;
             font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            color: #9ca3af;
-            margin-top: 14px;
-            margin-bottom: 8px;
-        }
-
-        textarea {
-            width: 100%;
-            height: 140px;
-            background: rgba(255, 255, 255, 0.06);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 8px;
-            color: #ffffff;
-            padding: 12px;
-            font-size: 0.95rem;
-            resize: none;
-            outline: none;
-            transition: border-color 0.2s;
-        }
-
-        textarea:focus, select:focus {
-            border-color: rgba(255, 255, 255, 0.4);
-        }
-
-        select {
-            width: 100%;
-            background: rgba(31, 41, 55, 0.8) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23ffffff'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E") no-repeat right 12px center;
-            background-size: 16px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 8px;
-            color: #ffffff;
-            padding: 12px;
-            font-size: 0.95rem;
-            appearance: none;
-            outline: none;
-            cursor: pointer;
-        }
-
-        button {
-            width: 100%;
-            background: #1c1917;
-            color: #ffffff;
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            padding: 14px;
-            border-radius: 8px;
-            font-size: 0.95rem;
-            font-weight: 600;
-            cursor: pointer;
-            margin-top: 10px;
-            transition: background 0.2s, transform 0.1s;
-        }
-
-        button:hover {
-            background: #262220;
-        }
-
-        button:active {
-            transform: scale(0.99);
-        }
-
-        /* Live Status Pill Header Banner styling */
-        .status-banner {
-            background: #0c0a09;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 16px;
-            padding: 24px;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.4);
-        }
-
-        .badge {
-            display: inline-block;
-            background: rgba(237, 137, 54, 0.15);
-            border: 1px solid rgba(237, 137, 54, 0.3);
-            color: #ed8936;
-            font-size: 0.7rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            padding: 4px 12px;
-            border-radius: 20px;
-            margin-bottom: 12px;
-        }
-
-        .strategy-title {
-            font-size: 1.6rem;
-            font-weight: 600;
+            margin-bottom: 20px;
             letter-spacing: -0.5px;
         }
 
-        /* Pipeline Micro Steps Display Cards */
-        .pipeline-card {
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-        }
-
-        .step-item {
-            display: flex;
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 12px;
-            padding: 16px 20px;
-            align-items: flex-start;
-            gap: 16px;
-        }
-
-        .step-number {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: rgba(255, 255, 255, 0.1);
-            color: #ffffff;
-            width: 28px;
-            height: 28px;
-            border-radius: 50%;
-            font-size: 0.85rem;
+        .input-label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
             font-weight: 700;
-            flex-shrink: 0;
-            margin-top: 2px;
+            color: #777;
+            margin-bottom: 8px;
+            display: block;
         }
 
-        .step-content {
+        .textarea-dump {
+            width: 100%;
+            height: 140px;
+            padding: 16px;
+            border-radius: 12px;
+            border: 1px solid #ddd;
+            background: #f5f5f7;
+            font-size: 1rem;
+            color: #222;
+            resize: none;
+            outline: none;
+            transition: border-color 0.2s;
+            margin-bottom: 25px;
+        }
+
+        .textarea-dump:focus {
+            border-color: #111;
+        }
+
+        .select-dropdown {
+            width: 100%;
+            padding: 14px 16px;
+            border-radius: 12px;
+            border: 1px solid #ddd;
+            background: #f5f5f7;
+            font-size: 1rem;
+            color: #222;
+            outline: none;
+            cursor: pointer;
+            margin-bottom: 30px;
+            appearance: none;
+            background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23333' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>");
+            background-repeat: no-repeat;
+            background-position: right 16px center;
+            background-size: 16px;
+        }
+
+        .btn-action {
+            width: 100%;
+            padding: 16px;
+            background: #1e1e24;
+            color: #fff;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.1s;
+        }
+
+        .btn-action:hover {
+            background: #111;
+        }
+
+        .btn-action:active {
+            transform: scale(0.99);
+        }
+
+        /* Target Output Containers */
+        #generativeBox {
+            min-height: 250px;
             display: flex;
             flex-direction: column;
-            gap: 4px;
+            justify-content: center;
         }
 
-        .step-title {
-            font-size: 1.05rem;
-            font-weight: 600;
+        .loading-text {
+            text-align: center;
+            color: #666;
+            font-size: 1.1rem;
+            font-weight: 500;
+            padding: 60px 20px;
+            animation: pulse 2s infinite ease-in-out;
         }
 
-        .step-duration {
-            color: #9ca3af;
-            font-size: 0.85rem;
-            font-weight: 400;
-        }
-
-        .step-justification {
-            color: #d1d5db;
-            font-size: 0.9rem;
-            line-height: 1.4;
-            margin-top: 2px;
+        @keyframes pulse {
+            0% { opacity: 0.6; }
+            50% { opacity: 1; }
+            100% { opacity: 0.6; }
         }
     </style>
 </head>
 <body>
 
-    <header>
+    <div class="header-section">
         <h1>HabitFlow</h1>
         <p>Defeat starting paralysis. Match your energy to your milestones.</p>
-    </header>
+    </div>
 
-    <main class="dashboard-container">
-        <section class="glass-card left-panel">
+    <div class="workspace-container">
+        <!-- Left Side: Interactive Formulation Panel -->
+        <div class="panel-card">
             <h2>What's on your mind?</h2>
             
-            <div class="section-label">The Task Dump</div>
-            <textarea id="taskInput" placeholder="Describe the task you're avoiding...">still giving same solutions in all three levels</textarea>
-
-            <div class="section-label">Current Energy Level</div>
-            <select id="energySelect">
-                <option value="Low">Low / Exhausted</option>
-                <option value="Medium" selected>Medium / Standard Focus</option>
-                <option value="High">High / Peak Focus</option>
+            <label class="input-label">The Task Dump</label>
+            <textarea id="taskInput" class="textarea-dump" placeholder="Dump your raw, unorganized task list or project objectives here..."></textarea>
+            
+            <label class="input-label">Current Energy Level</label>
+            <select id="energySelect" class="select-dropdown">
+                <option value="Low / Exhausted (Use 5-Min Rule)">Low / Exhausted (Use 5-Min Rule)</option>
+                <option value="Medium / Standard Focus" selected>Medium / Standard Focus</option>
+                <option value="High / Peak Execution Drive">High / Peak Execution Drive</option>
             </select>
+            
+            <button class="btn-action" onclick="generatePlan()">Generate Action Plan</button>
+        </div>
 
-            <button id="generateBtn" onclick="triggerActionPlan()">Generate Action Plan</button>
-        </section>
-
-        <section class="right-panel">
-            <div class="status-banner" id="statusBlock">
-                <div class="badge" id="strategyBadge">PEAK EXECUTION DRIVE (ADAPTIVE FALLBACK MODE)</div>
-                <div class="strategy-title" id="strategyHeadline">still giving same solutions in all three levels</div>
+        <!-- Right Side: Hidden Generative Delivery Viewport -->
+        <div id="generativeBox" class="panel-card" style="display: none;">
+            <div id="boxContent">
+                <!-- Inner content changes programmatically -->
             </div>
-
-            <div class="glass-card pipeline-card">
-                <div class="section-label" style="margin-top: 0;">Micro-Step Execution Pipeline</div>
-                <div id="pipelineContainer" class="pipeline-card">
-                    <div class="step-item">
-                        <div class="step-number">1</div>
-                        <div class="step-content">
-                            <div class="step-title">Isolate and deep-dive into the core logic chunk <span class="step-duration">(25 mins)</span></div>
-                            <div class="step-justification">Maximize deep focus while your energy levels are high.</div>
-                        </div>
-                    </div>
-                    <div class="step-item">
-                        <div class="step-number">2</div>
-                        <div class="step-content">
-                            <div class="step-title">Commit to working for just ten minutes straight <span class="step-duration">(10 mins)</span></div>
-                            <div class="step-justification">Once momentum starts, finishing paralysis drops naturally.</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-    </main>
+        </div>
+    </div>
 
     <script>
-        async function triggerActionPlan() {
-            const taskInput = document.getElementById('taskInput').value;
-            const energySelect = document.getElementById('energySelect').value;
-            const generateBtn = document.getElementById('generateBtn');
+        async function generatePlan() {
+            const taskInput = document.getElementById("taskInput").value.trim();
+            const energyLevel = document.getElementById("energySelect").value;
             
-            if(!taskInput.trim()) {
-                alert("Please add a task target description first!");
+            const generativeBox = document.getElementById("generativeBox");
+            const boxContent = document.getElementById("boxContent");
+
+            // Prevent blank actions
+            if (!taskInput) {
+                alert("Please dump your task thoughts first!");
                 return;
             }
 
-            generateBtn.innerText = "Analyzing Context...";
-            generateBtn.disabled = true;
+            // 1. Instantly present the container with the dynamic loading statement
+            generativeBox.style.display = "block";
+            boxContent.innerHTML = `
+                <div class="loading-text">
+                    Gemini is engineering your low-friction strategy...
+                </div>
+            `;
 
             try {
-                const response = await fetch('http://127.0.0.1:8000/api/analyze-task', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                // 2. Perform relative fetch query back to host origin
+                const response = await fetch("/api/analyze-task", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
                     body: JSON.stringify({
                         task_description: taskInput,
-                        energy_level: energySelect
+                        energy_level: energyLevel
                     })
                 });
 
+                if (!response.ok) throw new Error("Backend pipeline error exception");
                 const data = await response.json();
-                
-                // Redraw UI components dynamically mapping data payload layout keys
-                document.getElementById('strategyHeadline').innerText = data.original_task;
-                document.getElementById('strategyBadge').innerText = data.recommended_action_strategy;
-                
-                const pipelineContainer = document.getElementById('pipelineContainer');
-                pipelineContainer.innerHTML = ''; // Wipe stale items cleanly
 
-                data.suggested_micro_tasks.forEach((step, index) => {
-                    const stepHtml = `
-                        <div class="step-item">
-                            <div class="step-number">${index + 1}</div>
-                            <div class="step-content">
-                                <div class="step-title">${step.task_title} <span class="step-duration">(${step.estimated_minutes} mins)</span></div>
-                                <div class="step-justification">${step.justification}</div>
+                // 3. Compile the production interface view injection
+                let tasksHtml = `
+                    <div style="text-align: left;">
+                        <span style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; color: #e65100; background: #fff3e0; padding: 6px 14px; border-radius: 20px; font-weight: bold; display: inline-block; margin-bottom: 5px;">
+                            ${data.recommended_action_strategy}
+                        </span>
+                        <h3 style="margin-top: 10px; font-size: 1.6rem; color: #111; line-height: 1.3;">${data.original_task}</h3>
+                        <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
+                        <p style="font-size: 0.8rem; text-transform: uppercase; font-weight: bold; color: #888; letter-spacing: 0.5px; margin-bottom: 15px;">Micro-Step Execution Pipeline</p>
+                `;
+
+                data.suggested_micro_tasks.forEach((task, index) => {
+                    tasksHtml += `
+                        <div style="display: flex; align-items: flex-start; margin-bottom: 16px; background: #f8f9fa; padding: 18px; border-radius: 12px; border-left: 4px solid #111; box-shadow: 0 2px 5px rgba(0,0,0,0.02);">
+                            <div style="background: #111; color: #fff; width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; font-weight: bold; margin-right: 14px; flex-shrink: 0; margin-top: 2px;">
+                                ${index + 1}
+                            </div>
+                            <div>
+                                <h4 style="margin: 0 0 6px 0; font-size: 1.1rem; color: #1a1a1a; font-weight: 700;">
+                                    ${task.task_title} <span style="font-weight: normal; color: #666; font-size: 0.85rem; margin-left: 4px;">(${task.estimated_minutes} mins)</span>
+                                </h4>
+                                <p style="margin: 0; font-size: 0.95rem; color: #444; line-height: 1.4;">${task.justification}</p>
                             </div>
                         </div>
                     `;
-                    pipelineContainer.insertAdjacentHTML('beforeend', stepHtml);
                 });
 
-            } catch (err) {
-                console.error("Connection Interface Failure: ", err);
-                alert("Could not talk to backend engine server structure.");
-            } finally {
-                generateBtn.innerText = "Generate Action Plan";
-                generateBtn.disabled = false;
+                tasksHtml += `</div>`;
+                
+                // Swap processing banner out for the finalized execution route map
+                boxContent.innerHTML = tasksHtml;
+
+            } catch (error) {
+                console.error("API Fetch execution failure:", error);
+                boxContent.innerHTML = `
+                    <div style="color: #d32f2f; padding: 10px; text-align: left; font-size: 0.95rem; line-height: 1.5;">
+                        <strong style="font-size: 1.05rem;">Execution Pipeline Connection Blocker:</strong><br>
+                        Could not draw a response stream from the backend engine. Check your service container configurations on Render.
+                    </div>
+                `;
             }
         }
     </script>
