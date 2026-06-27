@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HabitFlow</title>
+    <style>
+        /* Base Setup & Space Background Styling */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-image: url('/static/habitflow.jpg');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            background-repeat: no-repeat;
+            color: #ffffff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px 20px;
+        }
+
+        /* Header Elements */
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        header h1 {
+            font-size: 3.5rem;
+            font-weight: 700;
+            letter-spacing: -1px;
+            margin-bottom: 10px;
+            text-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
+        }
+
+        header p {
+            color: #d1d5db;
+            font-size: 1.1rem;
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+        }
+
+        /* Dashboard Flex Container Grid Layout */
+        .dashboard-container {
+            display: flex;
+            width: 100%;
+            max-width: 1100px;
+            gap: 24px;
+            align-items: flex-start;
+        }
+
+        /* Frosted Glass Container Styles (Glassmorphism Effect) */
+        .glass-card {
+            background: rgba(23, 28, 36, 0.65);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 16px;
+            padding: 28px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .left-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .right-panel {
+            flex: 1.6;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* Form Controls Formatting */
+        h2 {
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .section-label {
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #9ca3af;
+            margin-top: 14px;
+            margin-bottom: 8px;
+        }
+
+        textarea {
+            width: 100%;
+            height: 140px;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            color: #ffffff;
+            padding: 12px;
+            font-size: 0.95rem;
+            resize: none;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        textarea:focus, select:focus {
+            border-color: rgba(255, 255, 255, 0.4);
+        }
+
+        select {
+            width: 100%;
+            background: rgba(31, 41, 55, 0.8) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23ffffff'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E") no-repeat right 12px center;
+            background-size: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            color: #ffffff;
+            padding: 12px;
+            font-size: 0.95rem;
+            appearance: none;
+            outline: none;
+            cursor: pointer;
+        }
+
+        button {
+            width: 100%;
+            background: #1c1917;
+            color: #ffffff;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            padding: 14px;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: background 0.2s, transform 0.1s;
+        }
+
+        button:hover {
+            background: #262220;
+        }
+
+        button:active {
+            transform: scale(0.99);
+        }
+
+        /* Live Status Pill Header Banner styling */
+        .status-banner {
+            background: #0c0a09;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+        }
+
+        .badge {
+            display: inline-block;
+            background: rgba(237, 137, 54, 0.15);
+            border: 1px solid rgba(237, 137, 54, 0.3);
+            color: #ed8936;
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            padding: 4px 12px;
+            border-radius: 20px;
+            margin-bottom: 12px;
+        }
+
+        .strategy-title {
+            font-size: 1.6rem;
+            font-weight: 600;
+            letter-spacing: -0.5px;
+        }
+
+        /* Pipeline Micro Steps Display Cards */
+        .pipeline-card {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .step-item {
+            display: flex;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 16px 20px;
+            align-items: flex-start;
+            gap: 16px;
+        }
+
+        .step-number {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            font-size: 0.85rem;
+            font-weight: 700;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        .step-content {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .step-title {
+            font-size: 1.05rem;
+            font-weight: 600;
+        }
+
+        .step-duration {
+            color: #9ca3af;
+            font-size: 0.85rem;
+            font-weight: 400;
+        }
+
+        .step-justification {
+            color: #d1d5db;
+            font-size: 0.9rem;
+            line-height: 1.4;
+            margin-top: 2px;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>HabitFlow</h1>
+        <p>Defeat starting paralysis. Match your energy to your milestones.</p>
+    </header>
+
+    <main class="dashboard-container">
+        <section class="glass-card left-panel">
+            <h2>What's on your mind?</h2>
+            
+            <div class="section-label">The Task Dump</div>
+            <textarea id="taskInput" placeholder="Describe the task you're avoiding...">still giving same solutions in all three levels</textarea>
+
+            <div class="section-label">Current Energy Level</div>
+            <select id="energySelect">
+                <option value="Low">Low / Exhausted</option>
+                <option value="Medium" selected>Medium / Standard Focus</option>
+                <option value="High">High / Peak Focus</option>
+            </select>
+
+            <button id="generateBtn" onclick="triggerActionPlan()">Generate Action Plan</button>
+        </section>
+
+        <section class="right-panel">
+            <div class="status-banner" id="statusBlock">
+                <div class="badge" id="strategyBadge">PEAK EXECUTION DRIVE (ADAPTIVE FALLBACK MODE)</div>
+                <div class="strategy-title" id="strategyHeadline">still giving same solutions in all three levels</div>
+            </div>
+
+            <div class="glass-card pipeline-card">
+                <div class="section-label" style="margin-top: 0;">Micro-Step Execution Pipeline</div>
+                <div id="pipelineContainer" class="pipeline-card">
+                    <div class="step-item">
+                        <div class="step-number">1</div>
+                        <div class="step-content">
+                            <div class="step-title">Isolate and deep-dive into the core logic chunk <span class="step-duration">(25 mins)</span></div>
+                            <div class="step-justification">Maximize deep focus while your energy levels are high.</div>
+                        </div>
+                    </div>
+                    <div class="step-item">
+                        <div class="step-number">2</div>
+                        <div class="step-content">
+                            <div class="step-title">Commit to working for just ten minutes straight <span class="step-duration">(10 mins)</span></div>
+                            <div class="step-justification">Once momentum starts, finishing paralysis drops naturally.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        async function triggerActionPlan() {
+            const taskInput = document.getElementById('taskInput').value;
+            const energySelect = document.getElementById('energySelect').value;
+            const generateBtn = document.getElementById('generateBtn');
+            
+            if(!taskInput.trim()) {
+                alert("Please add a task target description first!");
+                return;
+            }
+
+            generateBtn.innerText = "Analyzing Context...";
+            generateBtn.disabled = true;
+
+            try {
+                const response = await fetch('http://127.0.0.1:8000/api/analyze-task', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        task_description: taskInput,
+                        energy_level: energySelect
+                    })
+                });
+
+                const data = await response.json();
+                
+                // Redraw UI components dynamically mapping data payload layout keys
+                document.getElementById('strategyHeadline').innerText = data.original_task;
+                document.getElementById('strategyBadge').innerText = data.recommended_action_strategy;
+                
+                const pipelineContainer = document.getElementById('pipelineContainer');
+                pipelineContainer.innerHTML = ''; // Wipe stale items cleanly
+
+                data.suggested_micro_tasks.forEach((step, index) => {
+                    const stepHtml = `
+                        <div class="step-item">
+                            <div class="step-number">${index + 1}</div>
+                            <div class="step-content">
+                                <div class="step-title">${step.task_title} <span class="step-duration">(${step.estimated_minutes} mins)</span></div>
+                                <div class="step-justification">${step.justification}</div>
+                            </div>
+                        </div>
+                    `;
+                    pipelineContainer.insertAdjacentHTML('beforeend', stepHtml);
+                });
+
+            } catch (err) {
+                console.error("Connection Interface Failure: ", err);
+                alert("Could not talk to backend engine server structure.");
+            } finally {
+                generateBtn.innerText = "Generate Action Plan";
+                generateBtn.disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>
