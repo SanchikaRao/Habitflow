@@ -135,3 +135,5 @@ def read_root():
             return f.read()
     except FileNotFoundError:
         return "<h2>HabitFlow Frontend HTML template file not found!</h2>"
+from mangum import Mangum
+handler = Mangum(app)
