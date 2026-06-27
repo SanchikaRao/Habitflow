@@ -21,13 +21,13 @@
             align-items: center;
             justify-content: center;
             padding: 20px;
-            color: #fff;
+            color: #ffffff;
         }
 
         .header-section {
             text-align: center;
             margin-bottom: 40px;
-            text-shadow: 0 2px 10px rgba(0,0,0,0.8);
+            text-shadow: 0 4px 15px rgba(0,0,0,0.9);
         }
 
         .header-section h1 {
@@ -39,7 +39,7 @@
 
         .header-section p {
             font-size: 1.2rem;
-            color: #ccc;
+            color: #cccccc;
         }
 
         .workspace-container {
@@ -51,22 +51,27 @@
             justify-content: center;
         }
 
+        /* ---- Frosted Dark-Glass Panel Architecture ---- */
         .panel-card {
-            background: rgba(255, 255, 255, 0.98);
-            color: #111;
+            background: rgba(15, 15, 18, 0.75);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            color: #ffffff;
+            border: 1px solid rgba(255, 255, 255, 0.08);
             border-radius: 16px;
             padding: 30px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.6);
             flex: 1;
             min-width: 320px;
+            transition: all 0.3s ease;
         }
 
-        /* Input Form Elements */
         .panel-card h2 {
             font-size: 1.8rem;
             font-weight: 700;
             margin-bottom: 20px;
             letter-spacing: -0.5px;
+            color: #ffffff;
         }
 
         .input-label {
@@ -74,80 +79,89 @@
             text-transform: uppercase;
             letter-spacing: 1px;
             font-weight: 700;
-            color: #777;
+            color: rgba(255, 255, 255, 0.5);
             margin-bottom: 8px;
             display: block;
         }
 
+        /* ---- Form Control Styling Matching Background ---- */
         .textarea-dump {
             width: 100%;
             height: 140px;
             padding: 16px;
             border-radius: 12px;
-            border: 1px solid #ddd;
-            background: #f5f5f7;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.05);
             font-size: 1rem;
-            color: #222;
+            color: #ffffff;
             resize: none;
             outline: none;
-            transition: border-color 0.2s;
+            transition: all 0.2s;
             margin-bottom: 25px;
         }
 
         .textarea-dump:focus {
-            border-color: #111;
+            border-color: rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .textarea-dump::placeholder {
+            color: rgba(255, 255, 255, 0.35);
         }
 
         .select-dropdown {
             width: 100%;
             padding: 14px 16px;
             border-radius: 12px;
-            border: 1px solid #ddd;
-            background: #f5f5f7;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.05);
             font-size: 1rem;
-            color: #222;
+            color: #ffffff;
             outline: none;
             cursor: pointer;
             margin-bottom: 30px;
             appearance: none;
-            background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23333' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>");
+            background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>");
             background-repeat: no-repeat;
             background-position: right 16px center;
             background-size: 16px;
         }
 
+        .select-dropdown option {
+            background: #151518;
+            color: #ffffff;
+        }
+
         .btn-action {
             width: 100%;
             padding: 16px;
-            background: #1e1e24;
-            color: #fff;
+            background: #ffffff;
+            color: #111111;
             border: none;
             border-radius: 12px;
             font-size: 1.1rem;
             font-weight: 600;
             cursor: pointer;
-            transition: background 0.2s, transform 0.1s;
+            transition: all 0.2s ease;
         }
 
         .btn-action:hover {
-            background: #111;
+            background: rgba(255, 255, 255, 0.9);
+            transform: translateY(-1px);
         }
 
         .btn-action:active {
             transform: scale(0.99);
         }
 
-        /* Target Output Containers */
+        /* ---- Dynamic Generated Content Styling ---- */
         #generativeBox {
             min-height: 250px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
         }
 
         .loading-text {
             text-align: center;
-            color: #666;
+            color: rgba(255, 255, 255, 0.6);
             font-size: 1.1rem;
             font-weight: 500;
             padding: 60px 20px;
@@ -155,9 +169,57 @@
         }
 
         @keyframes pulse {
-            0% { opacity: 0.6; }
+            0% { opacity: 0.5; }
             50% { opacity: 1; }
-            100% { opacity: 0.6; }
+            100% { opacity: 0.5; }
+        }
+
+        /* ---- DYNAMIC MOBILE RESPONSIVE ENGINE ---- */
+        @media (max-width: 768px) {
+            body {
+                padding: 15px;
+                justify-content: flex-start;
+            }
+
+            .header-section {
+                margin-bottom: 25px;
+                margin-top: 10px;
+            }
+
+            .header-section h1 {
+                font-size: 2.5rem;
+            }
+
+            .header-section p {
+                font-size: 1rem;
+                line-height: 1.4;
+            }
+
+            .workspace-container {
+                flex-direction: column;
+                gap: 20px;
+                width: 100%;
+            }
+
+            .panel-card {
+                width: 100%;
+                min-width: 100%;
+                padding: 20px;
+            }
+
+            .panel-card h2 {
+                font-size: 1.5rem;
+                margin-bottom: 15px;
+            }
+
+            .textarea-dump {
+                height: 120px;
+                margin-bottom: 20px;
+            }
+
+            .select-dropdown {
+                margin-bottom: 20px;
+            }
         }
     </style>
 </head>
@@ -169,7 +231,6 @@
     </div>
 
     <div class="workspace-container">
-        <!-- Left Side: Interactive Formulation Panel -->
         <div class="panel-card">
             <h2>What's on your mind?</h2>
             
@@ -186,11 +247,9 @@
             <button class="btn-action" onclick="generatePlan()">Generate Action Plan</button>
         </div>
 
-        <!-- Right Side: Hidden Generative Delivery Viewport -->
         <div id="generativeBox" class="panel-card" style="display: none;">
             <div id="boxContent">
-                <!-- Inner content changes programmatically -->
-            </div>
+                </div>
         </div>
     </div>
 
@@ -202,13 +261,12 @@
             const generativeBox = document.getElementById("generativeBox");
             const boxContent = document.getElementById("boxContent");
 
-            // Prevent blank actions
             if (!taskInput) {
                 alert("Please dump your task thoughts first!");
                 return;
             }
 
-            // 1. Instantly present the container with the dynamic loading statement
+            // 1. Instantly display loading state inside dark frosted layout
             generativeBox.style.display = "block";
             boxContent.innerHTML = `
                 <div class="loading-text">
@@ -216,59 +274,59 @@
                 </div>
             `;
 
+            // Dynamic view scroll target for smaller phone screen viewports
+            if (window.innerWidth <= 768) {
+                generativeBox.scrollIntoView({ behavior: 'smooth' });
+            }
+
             try {
-                // 2. Perform relative fetch query back to host origin
                 const response = await fetch("/api/analyze-task", {
                     method: "POST",
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
+                    headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({
                         task_description: taskInput,
                         energy_level: energyLevel
                     })
                 });
 
-                if (!response.ok) throw new Error("Backend pipeline error exception");
+                if (!response.ok) throw new Error("Backend pipeline connection fault");
                 const data = await response.json();
 
                 // 3. Compile the production interface view injection
                 let tasksHtml = `
                     <div style="text-align: left;">
-                        <span style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; color: #e65100; background: #fff3e0; padding: 6px 14px; border-radius: 20px; font-weight: bold; display: inline-block; margin-bottom: 5px;">
+                        <span style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; color: #fff; background: rgba(230, 81, 0, 0.85); padding: 6px 14px; border-radius: 20px; font-weight: bold; display: inline-block; margin-bottom: 12px;">
                             ${data.recommended_action_strategy}
                         </span>
-                        <h3 style="margin-top: 10px; font-size: 1.6rem; color: #111; line-height: 1.3;">${data.original_task}</h3>
-                        <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
-                        <p style="font-size: 0.8rem; text-transform: uppercase; font-weight: bold; color: #888; letter-spacing: 0.5px; margin-bottom: 15px;">Micro-Step Execution Pipeline</p>
+                        <h3 style="font-size: 1.5rem; color: #ffffff; line-height: 1.3; font-weight: 700; margin-bottom: 15px;">${data.original_task}</h3>
+                        <hr style="border: 0; border-top: 1px solid rgba(255,255,255,0.1); margin: 20px 0;">
+                        <p style="font-size: 0.8rem; text-transform: uppercase; font-weight: bold; color: rgba(255,255,255,0.5); letter-spacing: 0.5px; margin-bottom: 15px;">Micro-Step Execution Pipeline</p>
                 `;
 
                 data.suggested_micro_tasks.forEach((task, index) => {
                     tasksHtml += `
-                        <div style="display: flex; align-items: flex-start; margin-bottom: 16px; background: #f8f9fa; padding: 18px; border-radius: 12px; border-left: 4px solid #111; box-shadow: 0 2px 5px rgba(0,0,0,0.02);">
-                            <div style="background: #111; color: #fff; width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; font-weight: bold; margin-right: 14px; flex-shrink: 0; margin-top: 2px;">
+                        <div style="display: flex; align-items: flex-start; margin-bottom: 16px; background: rgba(255, 255, 255, 0.04); padding: 18px; border-radius: 12px; border-left: 4px solid #ffffff; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
+                            <div style="background: #ffffff; color: #111111; width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; font-weight: bold; margin-right: 14px; flex-shrink: 0; margin-top: 2px;">
                                 ${index + 1}
                             </div>
                             <div>
-                                <h4 style="margin: 0 0 6px 0; font-size: 1.1rem; color: #1a1a1a; font-weight: 700;">
-                                    ${task.task_title} <span style="font-weight: normal; color: #666; font-size: 0.85rem; margin-left: 4px;">(${task.estimated_minutes} mins)</span>
+                                <h4 style="margin: 0 0 6px 0; font-size: 1.1rem; color: #ffffff; font-weight: 700; line-height: 1.3;">
+                                    ${task.task_title} <span style="font-weight: normal; color: rgba(255,255,255,0.6); font-size: 0.85rem; margin-left: 4px;">(${task.estimated_minutes} mins)</span>
                                 </h4>
-                                <p style="margin: 0; font-size: 0.95rem; color: #444; line-height: 1.4;">${task.justification}</p>
+                                <p style="margin: 0; font-size: 0.95rem; color: rgba(255,255,255,0.8); line-height: 1.45;">${task.justification}</p>
                             </div>
                         </div>
                     `;
                 });
 
                 tasksHtml += `</div>`;
-                
-                // Swap processing banner out for the finalized execution route map
                 boxContent.innerHTML = tasksHtml;
 
             } catch (error) {
                 console.error("API Fetch execution failure:", error);
                 boxContent.innerHTML = `
-                    <div style="color: #d32f2f; padding: 10px; text-align: left; font-size: 0.95rem; line-height: 1.5;">
-                        <strong style="font-size: 1.05rem;">Execution Pipeline Connection Blocker:</strong><br>
+                    <div style="color: #ff6b6b; padding: 10px; text-align: left; font-size: 0.95rem; line-height: 1.5;">
+                        <strong style="font-size: 1.05rem;">Execution Pipeline Blocker:</strong><br>
                         Could not draw a response stream from the backend engine. Check your service container configurations on Render.
                     </div>
                 `;
