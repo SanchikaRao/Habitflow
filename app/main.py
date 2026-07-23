@@ -61,7 +61,7 @@ async def analyze_task(payload: TaskInput):
     # 3. LIVE GEMINI PIPELINE
     if api_key and http_client:
         try:
-            url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={api_key}"
+            url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={api_key}"
             
             prompt = f"""
             You are a professional life coach and behavioral strategist.
