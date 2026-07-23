@@ -19,9 +19,9 @@ http_client = None
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     global http_client
-    # Open connection pool on server startup
-    http_client = httpx.AsyncClient(timeout=8.0)
-    print("LOG: [Lifespan] HTTPX AsyncClient connection pool initialized.")
+    # Open connection pool on server startup (Increased timeout to 20s to prevent ReadTimeout)
+    http_client = httpx.AsyncClient(timeout=20.0)
+    print("LOG: [Lifespan] HTTPX AsyncClient connection pool initialized with 20s timeout.")
     yield
     # Clean up client on server shutdown
     await http_client.aclose()
