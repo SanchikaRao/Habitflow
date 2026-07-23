@@ -244,7 +244,8 @@
                 <option value="High / Peak Execution Drive">High / Peak Execution Drive</option>
             </select>
             
-            <button class="btn-action" onclick="generatePlan()">Generate Action Plan</button>
+            <!-- FIXED: Added type="button" so button clicks don't trigger form reloads -->
+            <button id="generateBtn" type="button" class="btn-action" onclick="generatePlan()">Generate Action Plan</button>
         </div>
 
         <div id="generativeBox" class="panel-card" style="display: none;">
@@ -253,12 +254,12 @@
         </div>
     </div>
 
+    <!-- Firebase Compat SDKs -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-    
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 
     <script>
-        // Initialize your database credentials first
+        // Initialize Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyCK7lwZBP1OFogHbOUPqog5schN1CPuTSg",
             authDomain: "habitflow-18fd7.firebaseapp.com",
@@ -269,9 +270,13 @@
             measurementId: "G-T6ZJ6TH00G"
         };
 
-        // Initialize Firebase app instance and link Firestore global hooks
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
+        let db = null;
+        try {
+            firebase.initializeApp(firebaseConfig);
+            db = firebase.firestore();
+        } catch (e) {
+            console.warn("Firebase initialization warning:", e);
+        }
 
         async function generatePlan() {
             const taskInput = document.getElementById("taskInput").value.trim();
@@ -285,7 +290,7 @@
                 return;
             }
 
-            // 1. Instantly display loading state inside dark frosted layout
+            // 1. Instantly display loading state
             generativeBox.style.display = "block";
             boxContent.innerHTML = `
                 <div class="loading-text">
@@ -293,14 +298,13 @@
                 </div>
             `;
 
-            // Dynamic view scroll target for smaller phone screen viewports
             if (window.innerWidth <= 768) {
                 generativeBox.scrollIntoView({ behavior: 'smooth' });
             }
 
             try {
-                // Point directly to your active live Render backend deployment pipeline
-                const response = await fetch("https://habitflow-o71l.onrender.com/api/analyze-task", {
+                // Pointing directly to relative API route
+                const response = await fetch("/api/analyze-task", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({
@@ -309,58 +313,60 @@
                     })
                 });
 
-                if (!response.ok) throw new Error("Backend pipeline connection fault");
+                if (!response.ok) {
+                    throw new Error(`Server status ${response.status}: Failed to reach backend`);
+                }
+
                 const data = await response.json();
 
-                // 2. Auto-save parameters persistently in Google Cloud Firestore!
-                try {
-                    await db.collection("user_tasks").add({
+                // 2. Non-blocking Firestore logging in the background
+                if (db) {
+                    db.collection("user_tasks").add({
                         timestamp: new Date().toISOString(),
                         taskDump: taskInput,
                         energyLevel: energyLevel,
                         generatedPipeline: data
-                    });
-                    console.log("Pipeline log successfully saved to Cloud Firestore!");
-                } catch (dbError) {
-                    console.error("Firestore database write anomaly:", dbError);
+                    }).catch(err => console.error("Firestore background log error:", err));
                 }
 
-                // 3. Compile the production interface view injection
+                // 3. Render HTML UI
                 let tasksHtml = `
                     <div style="text-align: left;">
                         <span style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; color: #fff; background: rgba(230, 81, 0, 0.85); padding: 6px 14px; border-radius: 20px; font-weight: bold; display: inline-block; margin-bottom: 12px;">
-                            ${data.recommended_action_strategy}
+                            ${data.recommended_action_strategy || 'Action Plan'}
                         </span>
                         <h3 style="font-size: 1.5rem; color: #ffffff; line-height: 1.3; font-weight: 700; margin-bottom: 15px;">${data.original_task}</h3>
                         <hr style="border: 0; border-top: 1px solid rgba(255,255,255,0.1); margin: 20px 0;">
                         <p style="font-size: 0.8rem; text-transform: uppercase; font-weight: bold; color: rgba(255,255,255,0.5); letter-spacing: 0.5px; margin-bottom: 15px;">Micro-Step Execution Pipeline</p>
                 `;
 
-                data.suggested_micro_tasks.forEach((task, index) => {
-                    tasksHtml += `
-                        <div style="display: flex; align-items: flex-start; margin-bottom: 16px; background: rgba(255, 255, 255, 0.04); padding: 18px; border-radius: 12px; border-left: 4px solid #ffffff; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
-                            <div style="background: #ffffff; color: #111111; width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; font-weight: bold; margin-right: 14px; flex-shrink: 0; margin-top: 2px;">
-                                ${index + 1}
+                if (data.suggested_micro_tasks && Array.isArray(data.suggested_micro_tasks)) {
+                    data.suggested_micro_tasks.forEach((task, index) => {
+                        tasksHtml += `
+                            <div style="display: flex; align-items: flex-start; margin-bottom: 16px; background: rgba(255, 255, 255, 0.04); padding: 18px; border-radius: 12px; border-left: 4px solid #ffffff; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
+                                <div style="background: #ffffff; color: #111111; width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; font-weight: bold; margin-right: 14px; flex-shrink: 0; margin-top: 2px;">
+                                    ${index + 1}
+                                </div>
+                                <div>
+                                    <h4 style="margin: 0 0 6px 0; font-size: 1.1rem; color: #ffffff; font-weight: 700; line-height: 1.3;">
+                                        ${task.task_title} <span style="font-weight: normal; color: rgba(255,255,255,0.6); font-size: 0.85rem; margin-left: 4px;">(${task.estimated_minutes} mins)</span>
+                                    </h4>
+                                    <p style="margin: 0; font-size: 0.95rem; color: rgba(255,255,255,0.8); line-height: 1.45;">${task.justification}</p>
+                                </div>
                             </div>
-                            <div>
-                                <h4 style="margin: 0 0 6px 0; font-size: 1.1rem; color: #ffffff; font-weight: 700; line-height: 1.3;">
-                                    ${task.task_title} <span style="font-weight: normal; color: rgba(255,255,255,0.6); font-size: 0.85rem; margin-left: 4px;">(${task.estimated_minutes} mins)</span>
-                                </h4>
-                                <p style="margin: 0; font-size: 0.95rem; color: rgba(255,255,255,0.8); line-height: 1.45;">${task.justification}</p>
-                            </div>
-                        </div>
-                    `;
-                });
+                        `;
+                    });
+                }
 
                 tasksHtml += `</div>`;
                 boxContent.innerHTML = tasksHtml;
 
             } catch (error) {
-                console.error("API Fetch execution failure:", error);
+                console.error("API Execution Error:", error);
                 boxContent.innerHTML = `
                     <div style="color: #ff6b6b; padding: 10px; text-align: left; font-size: 0.95rem; line-height: 1.5;">
                         <strong style="font-size: 1.05rem;">Execution Pipeline Blocker:</strong><br>
-                        Could not draw a response stream from the backend engine. Check your service container configurations on Render.
+                        Could not connect to backend engine. Please check browser developer console for error details.
                     </div>
                 `;
             }

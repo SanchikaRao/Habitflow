@@ -1,7 +1,9 @@
 import os
 import json
 import httpx
-from fastapi import FastAPI, HTTPException
+import traceback
+from contextlib import asynccontextmanager
+from fastapi import FastAPI
 from fastapi.responses import HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
@@ -10,7 +12,21 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-app = FastAPI(title="HabitFlow AI Engine")
+# Global client holder for connection pooling
+http_client = None
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    global http_client
+    # Open connection pool on server startup (reused across all requests)
+    http_client = httpx.AsyncClient(timeout=8.0)
+    print("LOG: [Lifespan] HTTPX AsyncClient connection pool initialized.")
+    yield
+    # Clean up client on server shutdown
+    await http_client.aclose()
+    print("LOG: [Lifespan] HTTPX AsyncClient closed.")
+
+app = FastAPI(title="HabitFlow AI Engine", lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
@@ -20,12 +36,12 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# 1. PATH RESOLUTION (Absolute path to root 'frontend' directory)
+# 1. PATH RESOLUTION
 current_dir = os.path.dirname(os.path.abspath(__file__))  # Points to .../app
 base_dir = os.path.dirname(current_dir)                    # Points to root
 frontend_path = os.path.join(base_dir, "frontend")         # Points to .../frontend
 
-# 2. MOUNT STATIC FILES (Serves habitflow.jpg via /static/ habitflow.jpg)
+# 2. MOUNT STATIC FILES
 if os.path.exists(frontend_path):
     app.mount("/static", StaticFiles(directory=frontend_path), name="static")
 
@@ -35,12 +51,17 @@ class TaskInput(BaseModel):
 
 @app.post("/api/analyze-task")
 async def analyze_task(payload: TaskInput):
-    api_key = os.getenv("GEMINI_API_KEY", "")
+    api_key = os.getenv("GEMINI_API_KEY", "").strip()
+    
+    print("=" * 60)
+    print(f"LOG: Request received for task: '{payload.task_description}'")
+    print(f"LOG: GEMINI_API_KEY loaded? {'YES' if api_key else 'NO (Empty String)'}")
+    print(f"LOG: http_client active? {http_client is not None}")
     
     # 3. LIVE GEMINI PIPELINE
-    if api_key:
+    if api_key and http_client:
         try:
-            url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={api_key}"
+            url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={api_key}"
             
             prompt = f"""
             You are a professional life coach and behavioral strategist.
@@ -49,63 +70,60 @@ async def analyze_task(payload: TaskInput):
             User's Task: "{payload.task_description}"
             Current Energy State: "{payload.energy_level}"
 
-            CRITICAL RULES:
-            1. Your answer MUST be completely unique and highly relevant to the specific user input words.
-            2. Tailor the breakdown steps contextually to match their exact energy level.
+            CRITICAL RULE: Respond ONLY with valid, raw JSON matching this exact structure:
+            {{
+              "original_task": "{payload.task_description}",
+              "user_energy_level": "{payload.energy_level}",
+              "recommended_action_strategy": "short strategy name",
+              "suggested_micro_tasks": [
+                {{
+                  "task_title": "step title",
+                  "estimated_minutes": 5,
+                  "justification": "why this helps"
+                }}
+              ]
+            }}
             """
             
             request_body = {
                 "contents": [{"parts": [{"text": prompt}]}],
                 "generationConfig": {
-                    "responseMimeType": "application/json",
-                    "responseSchema": {
-                        "type": "OBJECT",
-                        "properties": {
-                            "original_task": {"type": "STRING"},
-                            "user_energy_level": {"type": "STRING"},
-                            "recommended_action_strategy": {"type": "STRING"},
-                            "suggested_micro_tasks": {
-                                "type": "ARRAY",
-                                "items": {
-                                    "type": "OBJECT",
-                                    "properties": {
-                                        "task_title": {"type": "STRING"},
-                                        "estimated_minutes": {"type": "INTEGER"},
-                                        "justification": {"type": "STRING"}
-                                    },
-                                    "required": ["task_title", "estimated_minutes", "justification"]
-                                }
-                            }
-                        },
-                        "required": ["original_task", "user_energy_level", "recommended_action_strategy", "suggested_micro_tasks"]
-                    }
+                    "responseMimeType": "application/json"
                 }
             }
             
             headers = {"Content-Type": "application/json"}
             
-            async with httpx.AsyncClient(timeout=10.0) as client:
-                response = await client.post(url, json=request_body, headers=headers)
+            print("LOG: Sending POST request to Gemini API...")
+            response = await http_client.post(url, json=request_body, headers=headers)
+            print(f"LOG: Gemini API HTTP Response Status Code: {response.status_code}")
+            
+            if response.status_code == 200:
+                response_data = response.json()
+                raw_text = response_data['candidates'][0]['content']['parts'][0]['text'].strip()
+                print(f"LOG: Raw Gemini Text Response: {raw_text[:150]}...")
                 
-                if response.status_code == 200:
-                    response_data = response.json()
-                    raw_text = response_data['candidates'][0]['content']['parts'][0]['text'].strip()
+                # Strip markdown code formatting if present
+                if raw_text.startswith("```"):
+                    raw_text = raw_text.split("\n", 1)[-1].rsplit("```", 1)[0].strip()
                     
-                    # Clean markdown code backticks if Gemini wraps output
-                    if raw_text.startswith("```"):
-                        raw_text = raw_text.split("\n", 1)[-1].rsplit("```", 1)[0].strip()
-                        
-                    return json.loads(raw_text)
-                else:
-                    # Print error log and proceed safely to Fallback Matrix
-                    print(f"Gemini API Error Status {response.status_code}: {response.text}")
-                    
+                parsed_json = json.loads(raw_text)
+                print("LOG: Successfully parsed Gemini JSON! Returning AI breakdown.")
+                print("=" * 60)
+                return parsed_json
+            else:
+                print(f"ERROR: Gemini API returned non-200 status: {response.status_code}")
+                print(f"ERROR Response Body: {response.text}")
+                
         except Exception as e:
-            print(f"Live Pipeline Exception: {str(e)}")
+            print(f"EXCEPTION: Error in live pipeline execution: {str(e)}")
+            print("EXCEPTION Traceback:")
+            traceback.print_exc()
     else:
-        print("GEMINI_API_KEY missing from environment variables. Running Fallback Mode.")
+        print("WARNING: Skipping live pipeline — GEMINI_API_KEY missing or client not initialized.")
 
-    # 4. DYNAMIC FALLBACK MATRIX (Guarantees response within 1 second)
+    # 4. DYNAMIC FALLBACK MATRIX
+    print("LOG: Entering Fallback Matrix execution.")
     task_lower = payload.task_description.lower()
     
     if len(task_lower.strip()) < 5 or not any(char.isalpha() for char in task_lower):
@@ -118,6 +136,8 @@ async def analyze_task(payload: TaskInput):
         strategy = f"Standard {payload.energy_level.capitalize()} Energy Milestone Sprint"
         tasks = [{"task_title": f"Isolate the first step for '{payload.task_description}'", "estimated_minutes": 10, "justification": f"Optimized for {payload.energy_level} workflow."}]
 
+    print("LOG: Returning Fallback Matrix response.")
+    print("=" * 60)
     return {
         "original_task": payload.task_description,
         "user_energy_level": payload.energy_level,
